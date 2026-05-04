@@ -21,7 +21,7 @@
 }
 html,body{
       height:100%;
-      background-image:url("/Farm system /file_000000009d88722fb8ca10f8addc3e62.png");
+      background-image:url("file_000000009d88722fb8ca10f8addc3e62.png");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -37,7 +37,7 @@ html,body{
       align-items:center;
       justify-content:center;
       min-height:100vh;
-      background-image:url("/Farm system /Fade.png");
+      background-image:url("Fade.png");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -52,7 +52,7 @@ html,body{
   
 }
 .login-card{
-      background-image:url("/Farm system /Logo-blackwhite .png");
+      background-image:url("Logo-blackwhite .png");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
