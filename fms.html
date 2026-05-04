@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keith's Farm Management System</title>
+<link rel="stylesheet" href="/Farm system /FMS.css ">
+<link rel="apple-touch-icon" sizes="180x180" href="/Farm system /apple-touch-icon.png ">
+<link rel="icon" type="image/png" sizes="32x32" href="/Farm system /favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/Farm system /favicon-16x16.png">
+<link rel="manifest" href="/Farm system /site.webmanifest">
+<link rel="icon" href="/Farm system /favicon.ico">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="farm-icon"><img src="/Farm system /file_000000009d88722fb8ca10f8addc3e62.png" alt="This is the system Logo"></span>
+      <h1>Farm Management System</h1>
+      <p>King Nazirite's Nesh Integrated Livestock Farm</p>
+    </div>
+    <div class="login-error" id="login-error">Incorrect PIN or username. Please try again.</div>
+    <div class="login-field">
+      <label>Select User</label>
+      <select id="login-user" style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:5px;font-family:var(--sans);font-size:14px;outline:none;"></select>
+    </div>
+    <div class="login-field">
+      <label>PIN (4 digits)</label>
+      <input type="password" id="login-pin" maxlength="4" placeholder="••••" inputmode="numeric"
+        onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="btn-login" onclick="doLogin()">Sign In →</button>
+    <div class="login-hint">Default PIN: <span>1234</span> &nbsp;·&nbsp; <span style="cursor:pointer;text-decoration:underline;" onclick="openModal('m-users')">Manage Users</span></div>
+    <div style="margin-top:14px;font-size:10.5px;color: var(--gold-dark);text-align:center;font-family:var(--mono);">
+      Data saved locally + cloud backup
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     APP
+══════════════════════════════════════════ -->
+<div id="app">
+  <div id="hdr">
+    <div class="hdr-top">
+      <div class="hdr-left">
+        <img src="/Farm system /file_000000009d88722fb8ca10f8addc3e62.png" alt="This is the system Logo">
+        <h1>Nazirite's <span>Farm</span> — Management System</h1>
+        <p id="hdr-user-info">Loading...</p>
+      </div>
+      <div class="hdr-right">
+        <div class="clock"><span id="ldate"></span><strong id="ltime"></strong></div>
+        <div id="sync-pill" class="sync-pill sp-local" onclick="openModal('m-sync')" title="Cloud sync">
+          <div class="sdot"></div><span id="sync-lbl">Local</span>
+        </div>
+        <div class="user-chip" onclick="doLogout()">
+          <div class="ua" id="user-avatar">👤</div>
+          <span id="user-name-chip">User</span>
+          <span style="font-size:9px;opacity:.6;">Logout</span>
+        </div>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="nbtn active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+      <button class="nbtn" onclick="showTab('income',this)">💰 Income</button>
+      <button class="nbtn" onclick="showTab('expenditure',this)">📤 Expenditure</button>
+      <button class="nbtn" onclick="showTab('pl',this)">📈 P&amp;L</button>
+      <button class="nbtn" onclick="showTab('feed',this)">🌾 Feed Store</button>
+      <button class="nbtn" onclick="showTab('animals',this)">🐖 Animals</button>
+      <button class="nbtn" onclick="showTab('health',this)">💉 Health</button>
+      <button class="nbtn" onclick="showTab('eggs',this)">🥚 Eggs</button>
+      <button class="nbtn" onclick="showTab('alerts-settings',this)">🔔 Alerts</button>
+      <button class="nbtn" onclick="showTab('export',this)">📥 Export</button>
+      <button class="nbtn" onclick="showTab('backup',this)">☁ Backup</button>
+    </nav>
+  </div>
+
+  <div id="main">
+
+  <!-- DASHBOARD -->
+  <div class="tab-panel active" id="tab-dashboard">
+    <div class="alerts" id="alert-container"></div>
+    <div class="kpi-grid">
+      <div class="kpi g"><div class="kpi-label">Revenue (Month)</div><div class="kpi-value" id="kpi-rev">KES 0</div><div class="kpi-sub" id="kpi-rev-s">—</div></div>
+      <div class="kpi r"><div class="kpi-label">Expenses (Month)</div><div class="kpi-value" id="kpi-exp">KES 0</div><div class="kpi-sub" id="kpi-exp-s">—</div></div>
+      <div class="kpi a"><div class="kpi-label">Net Profit/Loss</div><div class="kpi-value" id="kpi-net">KES 0</div><div class="kpi-sub" id="kpi-net-s">—</div></div>
+      <div class="kpi b"><div class="kpi-label">Pigs on Farm</div><div class="kpi-value" id="kpi-pigs">0</div><div class="kpi-sub">Active</div></div>
+      <div class="kpi b"><div class="kpi-label">Poultry</div><div class="kpi-value" id="kpi-birds">0</div><div class="kpi-sub">Active</div></div>
+      <div class="kpi p"><div class="kpi-label">Eggs (Month)</div><div class="kpi-value" id="kpi-eggs">0</div><div class="kpi-sub" id="kpi-eggs-s">—</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="card-head"><h2>Monthly Overview</h2></div><div class="bar-chart" id="monthly-chart"><div class="empty-state">Add records to see chart</div></div></div>
+      <div class="card"><div class="card-head"><h2>Quick Actions</h2></div>
+        <div style="padding:13px;display:flex;flex-direction:column;gap:8px;">
+          <button class="btn btn-primary" onclick="openModal('m-income')" style="text-align:left;">💰 Record a Sale</button>
+          <button class="btn btn-outline" onclick="openModal('m-expense')" style="text-align:left;">📤 Record an Expense</button>
+          <button class="btn btn-outline" onclick="openModal('m-egg')" style="text-align:left;">🥚 Log Egg Collection</button>
+          <button class="btn btn-outline" onclick="openModal('m-stock')" style="text-align:left;">🌾 Update Feed Stock</button>
+          <button class="btn btn-amber" onclick="syncToCloud()" style="color:#fff;text-align:left;">☁ Sync to Cloud Now</button>
+          <button class="btn btn-purple" onclick="exportAllExcel()" style="color:#fff;text-align:left;">📥 Export to Excel</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Recent Transactions</h2></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>By</th></tr></thead>
+        <tbody id="recent-tb"><tr><td colspan="6" class="empty-state">No transactions yet.</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- INCOME -->
+  <div class="tab-panel" id="tab-income">
+    <div class="card">
+      <div class="card-head"><h2>Income Records</h2>
+        <div class="chr">
+          <button class="btn btn-primary" onclick="openModal('m-income')">+ Add Income</button>
+          <button class="btn btn-purple btn-sm" onclick="exportSheetExcel('income')">📥 Excel</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Source</th><th>Category</th><th>Qty/Unit</th><th>Unit Price</th><th>Total(KES)</th><th>Notes</th><th>By</th><th></th></tr></thead>
+        <tbody id="income-tb"><tr><td colspan="9" class="empty-state">No income records.</td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="card"><div class="card-head"><h2>Income Breakdown</h2></div><div class="bar-chart" id="income-chart"><div class="empty-state">Add records</div></div></div>
+  </div>
+
+  <!-- EXPENDITURE -->
+  <div class="tab-panel" id="tab-expenditure">
+    <div class="card">
+      <div class="card-head"><h2>Expenditure Records</h2>
+        <div class="chr">
+          <button class="btn btn-primary" onclick="openModal('m-expense')">+ Add Expense</button>
+          <button class="btn btn-purple btn-sm" onclick="exportSheetExcel('expenses')">📥 Excel</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Vendor</th><th>Amount(KES)</th><th>Notes</th><th>By</th><th></th></tr></thead>
+        <tbody id="expense-tb"><tr><td colspan="8" class="empty-state">No expense records.</td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="card"><div class="card-head"><h2>Expenditure Breakdown</h2></div><div class="bar-chart" id="expense-chart"><div class="empty-state">Add records</div></div></div>
+  </div>
+
+  <!-- P&L -->
+  <div class="tab-panel" id="tab-pl">
+    <div class="card">
+      <div class="card-head"><h2>Profit &amp; Loss Statement</h2>
+        <div class="chr">
+          <select id="pl-filter" class="btn btn-outline" style="font-size:10.5px;" onchange="renderPL()"><option value="all">All Time</option></select>
+          <button class="btn btn-purple btn-sm" onclick="exportSheetExcel('pl')">📥 Excel</button>
+        </div>
+      </div>
+      <div class="pl-wrap" id="pl-content"><div class="empty-state">Add income and expense records to generate the P&L statement.</div></div>
+    </div>
+  </div>
+
+  <!-- FEED STORE -->
+  <div class="tab-panel" id="tab-feed">
+    <div class="card">
+      <div class="card-head"><h2>Feed &amp; Store Inventory</h2>
+        <div class="chr">
+          <button class="btn btn-primary" onclick="openModal('m-stock')">+ Update Stock</button>
+          <button class="btn btn-purple btn-sm" onclick="exportSheetExcel('stock')">📥 Excel</button>
+        </div>
+      </div>
+      <div class="stock-grid" id="stock-grid"></div>
+    </div>
+    <div class="card"><div class="card-head"><h2>Stock Movement Log</h2></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Item</th><th>Movement</th><th>Quantity</th><th>Remaining</th><th>Notes</th><th>By</th></tr></thead>
+        <tbody id="stock-tb"><tr><td colspan="7" class="empty-state">No movements.</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ANIMALS -->
+  <div class="tab-panel" id="tab-animals">
+    <div class="card">
+      <div class="card-head"><h2>Animal Records</h2>
+        <div class="chr">
+          <button class="btn btn-primary" onclick="openModal('m-animal')">+ Add Animal</button>
+          <button class="btn btn-purple btn-sm" onclick="exportSheetExcel('animals')">📥 Excel</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Tag/ID</th><th>Type</th><th>Breed</th><th>DOB</th><th>Weight(kg)</th><th>Pen/Zone</th><th>Sex</th><th>Status</th><th>Added By</th><th></th></tr></thead>
+        <tbody id="animal-tb"><tr><td colspan="10" class="empty-state">No animals recorded.</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- HEALTH -->
+  <div class="tab-panel" id="tab-health">
+    <div class="card">
+      <div class="card-head"><h2>Health &amp; Veterinary Log</h2>
+        <div class="chr">
+          <button class="btn btn-primary" onclick="openModal('m-health')">+ Add Health Record</button>
+          <button class="btn btn-purple btn-sm" onclick="exportSheetExcel('health')">📥 Excel</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Animal/Group</th><th>Type</th><th>Treatment/Vaccine</th><th>Vet/Person</th><th>Cost(KES)</th><th>Next Due</th><th>By</th></tr></thead>
+        <tbody id="health-tb"><tr><td colspan="8" class="empty-state">No health records.</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- EGGS -->
+  <div class="tab-panel" id="tab-eggs">
+    <div class="card">
+      <div class="card-head"><h2>Egg Production Log</h2>
+        <div class="chr">
+          <button class="btn btn-primary" onclick="openModal('m-egg')">+ Record Collection</button>
+          <button class="btn btn-purple btn-sm" onclick="exportSheetExcel('eggs')">📥 Excel</button>
+        </div>
+      </div>
+      <div class="kpi-grid" style="padding:13px;">
+        <div class="kpi p"><div class="kpi-label">Today</div><div class="kpi-value" id="egg-today">0</div><div class="kpi-sub">eggs</div></div>
+        <div class="kpi b"><div class="kpi-label">This Week</div><div class="kpi-value" id="egg-week">0</div><div class="kpi-sub">eggs</div></div>
+        <div class="kpi g"><div class="kpi-label">This Month</div><div class="kpi-value" id="egg-month">0</div><div class="kpi-sub">eggs</div></div>
+        <div class="kpi a"><div class="kpi-label">Month Value</div><div class="kpi-value" id="egg-val">KES 0</div><div class="kpi-sub">@KES 15/egg</div></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Zone/Flock</th><th>Collected</th><th>Broken</th><th>Net Good</th><th>Notes</th><th>By</th></tr></thead>
+        <tbody id="egg-tb"><tr><td colspan="7" class="empty-state">No egg records.</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ALERTS & NOTIFICATIONS -->
+  <div class="tab-panel" id="tab-alerts-settings">
+    <div class="two-col">
+      <!-- SMS Settings -->
+      <div class="card">
+        <div class="card-head"><h2>📱 SMS Alerts (Africa's Talking)</h2></div>
+        <div style="padding:14px;">
+          <div class="info-box ib-blue" style="margin-bottom:12px;">
+            <b>How SMS alerts work:</b> When a low-stock or critical alert is triggered, the system sends an SMS to your registered number via Africa's Talking API — the most reliable SMS gateway in Kenya.
+            Sign up free at <b>africastalking.com</b>
+          </div>
+          <div class="alert-channel">
+            <h4>⚙ Africa's Talking Credentials</h4>
+            <div class="form-grid" style="padding:0;grid-template-columns:1fr;">
+              <div class="fg"><label>API Username</label><input type="text" id="at-username" placeholder="your_username"/></div>
+              <div class="fg"><label>API Key</label><input type="text" id="at-apikey" placeholder="atsk_xxxxxxxxx"/></div>
+              <div class="fg"><label>Sender Name (short code)</label><input type="text" id="at-sender" placeholder="FARM-ALERTS or leave blank"/></div>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;">
+              <button class="btn btn-primary btn-sm" onclick="saveSMSConfig()">Save SMS Config</button>
+              <button class="test-btn" onclick="sendTestSMS()">Send Test SMS</button>
+            </div>
+          </div>
+          <div class="alert-channel">
+            <h4>📞 Alert Phone Numbers</h4>
+            <div class="form-grid" style="padding:0;grid-template-columns:1fr;">
+              <div class="fg"><label>Primary Number (Farm Owner)</label><input type="text" id="sms-num-1" placeholder="+254700000000"/></div>
+              <div class="fg"><label>Secondary Number (Manager)</label><input type="text" id="sms-num-2" placeholder="+254700000001 (optional)"/></div>
+            </div>
+          </div>
+          <div class="alert-channel">
+            <h4>🔔 SMS Alert Triggers</h4>
+            <div class="toggle-row"><span>Feed stock critically low</span><label class="toggle"><input type="checkbox" id="sms-low-stock" checked/><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><span>Feed stock out completely</span><label class="toggle"><input type="checkbox" id="sms-out-stock" checked/><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><span>Animal marked sick</span><label class="toggle"><input type="checkbox" id="sms-sick" checked/><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><span>Monthly loss detected</span><label class="toggle"><input type="checkbox" id="sms-loss" checked/><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><span>Vaccination due reminder</span><label class="toggle"><input type="checkbox" id="sms-vacc"/><span class="toggle-slider"></span></label></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSMSConfig()" style="margin-top:10px;">Save All SMS Settings</button>
+          </div>
+          <div id="sms-log" style="font-family:var(--mono);font-size:10.5px;background:#f5f5f5;border-radius:4px;padding:10px;max-height:120px;overflow-y:auto;margin-top:8px;"></div>
+        </div>
+      </div>
+
+      <!-- Email Settings -->
+      <div class="card">
+        <div class="card-head"><h2>📧 Email Alerts (EmailJS)</h2></div>
+        <div style="padding:14px;">
+          <div class="info-box ib-amber" style="margin-bottom:12px;">
+            <b>How email alerts work:</b> The system sends alert emails using EmailJS — a free service (200 emails/month free). Sign up at <b>emailjs.com</b>, create a service + template, and paste your keys below. No server needed.
+          </div>
+          <div class="alert-channel">
+            <h4>⚙ EmailJS Credentials</h4>
+            <div class="form-grid" style="padding:0;grid-template-columns:1fr;">
+              <div class="fg"><label>EmailJS Public Key</label><input type="text" id="ejs-pubkey" placeholder="user_xxxxxxxxx"/></div>
+              <div class="fg"><label>Service ID</label><input type="text" id="ejs-service" placeholder="service_xxxxxxx"/></div>
+              <div class="fg"><label>Template ID</label><input type="text" id="ejs-template" placeholder="template_xxxxxxx"/></div>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;">
+              <button class="btn btn-primary btn-sm" onclick="saveEmailConfig()">Save Email Config</button>
+              <button class="test-btn" onclick="sendTestEmail()">Send Test Email</button>
+            </div>
+          </div>
+          <div class="alert-channel">
+            <h4>📬 Alert Email Addresses</h4>
+            <div class="form-grid" style="padding:0;grid-template-columns:1fr;">
+              <div class="fg"><label>Primary Email (Farm Owner)</label><input type="email" id="email-1" placeholder="keith@example.com"/></div>
+              <div class="fg"><label>Secondary Email (Manager)</label><input type="email" id="email-2" placeholder="manager@example.com (optional)"/></div>
+            </div>
+          </div>
+          <div class="alert-channel">
+            <h4>🔔 Email Alert Triggers</h4>
+            <div class="toggle-row"><span>Feed stock critically low</span><label class="toggle"><input type="checkbox" id="email-low-stock" checked/><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><span>Feed stock out completely</span><label class="toggle"><input type="checkbox" id="email-out-stock" checked/><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><span>Animal marked sick</span><label class="toggle"><input type="checkbox" id="email-sick" checked/><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><span>Monthly P&amp;L loss detected</span><label class="toggle"><input type="checkbox" id="email-loss"/><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><span>Weekly summary report</span><label class="toggle"><input type="checkbox" id="email-weekly"/><span class="toggle-slider"></span></label></div>
+            <button class="btn btn-primary btn-sm" onclick="saveEmailConfig()" style="margin-top:10px;">Save All Email Settings</button>
+          </div>
+          <div id="email-log" style="font-family:var(--mono);font-size:10.5px;background:#f5f5f5;border-radius:4px;padding:10px;max-height:120px;overflow-y:auto;margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert History -->
+    <div class="card">
+      <div class="card-head"><h2>📋 Alert History</h2><button class="btn btn-outline btn-sm" onclick="clearAlertHistory()">Clear</button></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Time</th><th>Channel</th><th>Trigger</th><th>Message</th><th>Status</th></tr></thead>
+        <tbody id="alert-history-tb"><tr><td colspan="5" class="empty-state">No alerts sent yet.</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- EXPORT TO EXCEL -->
+  <div class="tab-panel" id="tab-export">
+    <div class="card">
+      <div class="card-head"><h2>📥 Export to Excel</h2></div>
+      <div style="padding:16px;">
+        <div class="info-box ib-green" style="margin-bottom:14px;">
+          Export any module to a <b>.xlsx Excel file</b> you can open directly in Microsoft Excel, Google Sheets, or LibreOffice. All data is formatted with headers, totals, and currency values.
+        </div>
+        <div class="three-col">
+          <div class="card" style="margin-bottom:0;">
+            <div style="padding:13px;">
+              <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px;">💰 Financial Reports</div>
+              <div style="display:flex;flex-direction:column;gap:7px;">
+                <button class="btn btn-primary" onclick="exportSheetExcel('income')">Income Records (.xlsx)</button>
+                <button class="btn btn-outline" onclick="exportSheetExcel('expenses')">Expenditure Records (.xlsx)</button>
+                <button class="btn btn-outline" onclick="exportSheetExcel('pl')">Profit &amp; Loss Statement (.xlsx)</button>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom:0;">
+            <div style="padding:13px;">
+              <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px;">🐖 Farm Records</div>
+              <div style="display:flex;flex-direction:column;gap:7px;">
+                <button class="btn btn-primary" onclick="exportSheetExcel('animals')">Animal Records (.xlsx)</button>
+                <button class="btn btn-outline" onclick="exportSheetExcel('health')">Health &amp; Vet Log (.xlsx)</button>
+                <button class="btn btn-outline" onclick="exportSheetExcel('eggs')">Egg Production (.xlsx)</button>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom:0;">
+            <div style="padding:13px;">
+              <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px;">📦 Store &amp; Full Export</div>
+              <div style="display:flex;flex-direction:column;gap:7px;">
+                <button class="btn btn-primary" onclick="exportSheetExcel('stock')">Feed Store Movements (.xlsx)</button>
+                <button class="btn btn-outline" onclick="exportAllExcel()">📥 Full Farm Report (.xlsx)</button>
+                <button class="btn btn-outline" onclick="exportJSON()">⬇ JSON Backup</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="section-sep"></div>
+        <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:10px;">Preview — Income Records</div>
+        <div class="xl-preview" id="xl-preview-income"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BACKUP -->
+  <div class="tab-panel" id="tab-backup">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head"><h2>☁ Cloud Backup</h2></div>
+        <div style="padding:14px;">
+          <div id="cloud-status-box" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:12px;margin-bottom:12px;font-family:var(--mono);font-size:11px;line-height:1.9;color:var(--text2);"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="syncToCloud()">☁ Sync Now</button>
+            <button class="btn btn-blue" onclick="restoreFromCloud()">⬇ Restore</button>
+          </div>
+          <div id="sync-log" style="font-family:var(--mono);font-size:10px;background:#f0f0f0;border-radius:4px;padding:9px;max-height:140px;overflow-y:auto;margin-top:10px;line-height:1.8;"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>📱 Local Storage</h2></div>
+        <div style="padding:14px;">
+          <div id="local-stats" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:12px;margin-bottom:12px;font-family:var(--mono);font-size:11px;line-height:1.9;color:var(--text2);"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-outline" onclick="exportJSON()">⬇ Export JSON</button>
+            <button class="btn btn-outline" onclick="document.getElementById('imp-file').click()">⬆ Import JSON</button>
+            <input type="file" id="imp-file" accept=".json" style="display:none" onchange="handleImport(event)"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>📊 Data Summary</h2></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Module</th><th>Records</th><th>Local Saved</th><th>Cloud Synced</th><th>Last Entry</th></tr></thead>
+        <tbody id="data-summary-tb"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  </div><!-- end main -->
+</div><!-- end app -->
+
+<!-- ══════════════════ MODALS ══════════════════ -->
+
+<!-- INCOME -->
+<div class="modal-overlay" id="m-income">
+  <div class="modal"><div class="modal-head"><h3>💰 Add Income Record</h3><button class="mc" onclick="closeModal('m-income')">×</button></div>
+  <div class="form-grid">
+    <div class="fg"><label>Date</label><input type="date" id="i-date"/></div>
+    <div class="fg"><label>Source</label><select id="i-source"><option>Pig Sale</option><option>Pork / Meat Sale</option><option>Egg Sale</option><option>Live Chicken Sale</option><option>Dressed Chicken Sale</option><option>Day-old Chick Sale</option><option>Manure Sale</option><option>Other</option></select></div>
+    <div class="fg"><label>Category</label><select id="i-cat"><option>Pig Unit</option><option>Poultry Unit</option><option>Mixed</option><option>Other</option></select></div>
+    <div class="fg"><label>Quantity</label><input type="number" id="i-qty" placeholder="e.g. 5" min="0"/></div>
+    <div class="fg"><label>Unit</label><input type="text" id="i-unit" placeholder="pigs/kg/trays"/></div>
+    <div class="fg"><label>Unit Price (KES)</label><input type="number" id="i-price" placeholder="0" min="0"/></div>
+    <div class="fg" style="grid-column:1/-1"><label>Notes</label><textarea id="i-notes" placeholder="Buyer, market, animal tag..."></textarea></div>
+  </div>
+  <div class="form-actions"><button class="btn btn-primary" onclick="addIncome()">Save Record</button><button class="btn btn-outline" onclick="closeModal('m-income')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- EXPENSE -->
+<div class="modal-overlay" id="m-expense">
+  <div class="modal"><div class="modal-head"><h3>📤 Add Expenditure</h3><button class="mc" onclick="closeModal('m-expense')">×</button></div>
+  <div class="form-grid">
+    <div class="fg"><label>Date</label><input type="date" id="e-date"/></div>
+    <div class="fg"><label>Category</label><select id="e-cat"><option>Feed – Pigs</option><option>Feed – Poultry</option><option>Veterinary</option><option>Medications/Vaccines</option><option>Labour</option><option>Utilities</option><option>Equipment/Tools</option><option>Repairs & Maintenance</option><option>Transport</option><option>Bedding/Litter</option><option>Other</option></select></div>
+    <div class="fg"><label>Description</label><input type="text" id="e-desc" placeholder="e.g. Growers mash 50kg"/></div>
+    <div class="fg"><label>Vendor / Supplier</label><input type="text" id="e-vendor" placeholder="e.g. Unga Feeds Ltd"/></div>
+    <div class="fg"><label>Amount (KES)</label><input type="number" id="e-amount" placeholder="0" min="0"/></div>
+    <div class="fg" style="grid-column:1/-1"><label>Notes</label><textarea id="e-notes" placeholder="Receipt no., details..."></textarea></div>
+  </div>
+  <div class="form-actions"><button class="btn btn-primary" onclick="addExpense()">Save Record</button><button class="btn btn-outline" onclick="closeModal('m-expense')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- STOCK -->
+<div class="modal-overlay" id="m-stock">
+  <div class="modal"><div class="modal-head"><h3>🌾 Update Stock</h3><button class="mc" onclick="closeModal('m-stock')">×</button></div>
+  <div class="form-grid">
+    <div class="fg"><label>Date</label><input type="date" id="s-date"/></div>
+    <div class="fg"><label>Item</label><select id="s-item"><option>Pig Growers Mash</option><option>Pig Finisher Pellets</option><option>Pig Starter Feed</option><option>Poultry Layers Mash</option><option>Poultry Broiler Starter</option><option>Poultry Broiler Finisher</option><option>Chick Mash</option><option>Vaccines/Medications</option><option>Bedding/Sawdust</option><option>Disinfectants</option><option>Other</option></select></div>
+    <div class="fg"><label>Movement</label><select id="s-move"><option>Stock In (Purchase)</option><option>Stock Out (Usage)</option><option>Stock Out (Wastage)</option></select></div>
+    <div class="fg"><label>Quantity</label><input type="number" id="s-qty" placeholder="e.g. 10" min="0"/></div>
+    <div class="fg"><label>Unit</label><input type="text" id="s-unit" placeholder="bags/kg/litres"/></div>
+    <div class="fg" style="grid-column:1/-1"><label>Notes</label><textarea id="s-notes" placeholder="Supplier, batch, cost..."></textarea></div>
+  </div>
+  <div class="form-actions"><button class="btn btn-primary" onclick="addStock()">Save Record</button><button class="btn btn-outline" onclick="closeModal('m-stock')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- ANIMAL -->
+<div class="modal-overlay" id="m-animal">
+  <div class="modal"><div class="modal-head"><h3>🐖 Add Animal Record</h3><button class="mc" onclick="closeModal('m-animal')">×</button></div>
+  <div class="form-grid">
+    <div class="fg"><label>Tag / ID</label><input type="text" id="a-tag" placeholder="e.g. PIG-001"/></div>
+    <div class="fg"><label>Type</label><select id="a-type"><option>Pig</option><option>Layer Hen</option><option>Broiler</option><option>Cockerel</option><option>Chick</option></select></div>
+    <div class="fg"><label>Breed</label><input type="text" id="a-breed" placeholder="e.g. Large White"/></div>
+    <div class="fg"><label>Date of Birth</label><input type="date" id="a-dob"/></div>
+    <div class="fg"><label>Weight (kg)</label><input type="number" id="a-weight" placeholder="e.g. 45" min="0"/></div>
+    <div class="fg"><label>Pen / Zone</label><input type="text" id="a-pen" placeholder="e.g. Pen 1, Broiler A"/></div>
+    <div class="fg"><label>Sex</label><select id="a-sex"><option>Female</option><option>Male</option></select></div>
+    <div class="fg"><label>Status</label><select id="a-status"><option>Active</option><option>Pregnant/Brooding</option><option>Sick</option><option>Sold</option><option>Deceased</option></select></div>
+    <div class="fg" style="grid-column:1/-1"><label>Notes</label><textarea id="a-notes" placeholder="Vaccination history, source, purchase price..."></textarea></div>
+  </div>
+  <div class="form-actions"><button class="btn btn-primary" onclick="addAnimal()">Save Record</button><button class="btn btn-outline" onclick="closeModal('m-animal')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- HEALTH -->
+<div class="modal-overlay" id="m-health">
+  <div class="modal"><div class="modal-head"><h3>💉 Add Health Record</h3><button class="mc" onclick="closeModal('m-health')">×</button></div>
+  <div class="form-grid">
+    <div class="fg"><label>Date</label><input type="date" id="h-date"/></div>
+    <div class="fg"><label>Animal / Group</label><input type="text" id="h-animal" placeholder="e.g. All Pigs / PIG-003"/></div>
+    <div class="fg"><label>Record Type</label><select id="h-type"><option>Vaccination</option><option>Deworming</option><option>Treatment</option><option>Routine Check</option><option>Surgery</option><option>Death</option><option>Other</option></select></div>
+    <div class="fg"><label>Treatment / Vaccine</label><input type="text" id="h-treat" placeholder="e.g. Newcastle Vaccine"/></div>
+    <div class="fg"><label>Administered By</label><input type="text" id="h-vet" placeholder="e.g. Dr. Kamau / Self"/></div>
+    <div class="fg"><label>Cost (KES)</label><input type="number" id="h-cost" placeholder="0" min="0"/></div>
+    <div class="fg"><label>Next Due Date</label><input type="date" id="h-next"/></div>
+    <div class="fg" style="grid-column:1/-1"><label>Notes</label><textarea id="h-notes" placeholder="Symptoms, dosage, batch no..."></textarea></div>
+  </div>
+  <div class="form-actions"><button class="btn btn-primary" onclick="addHealth()">Save Record</button><button class="btn btn-outline" onclick="closeModal('m-health')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- EGG -->
+<div class="modal-overlay" id="m-egg">
+  <div class="modal"><div class="modal-head"><h3>🥚 Record Egg Collection</h3><button class="mc" onclick="closeModal('m-egg')">×</button></div>
+  <div class="form-grid">
+    <div class="fg"><label>Date</label><input type="date" id="g-date"/></div>
+    <div class="fg"><label>Zone / Flock</label><select id="g-zone"><option>Laying Zone</option><option>Broiler A</option><option>Broiler B</option><option>All Zones</option></select></div>
+    <div class="fg"><label>Eggs Collected</label><input type="number" id="g-total" placeholder="0" min="0"/></div>
+    <div class="fg"><label>Broken / Rejected</label><input type="number" id="g-broken" placeholder="0" min="0"/></div>
+    <div class="fg" style="grid-column:1/-1"><label>Notes</label><textarea id="g-notes" placeholder="Observations..."></textarea></div>
+  </div>
+  <div class="form-actions"><button class="btn btn-primary" onclick="addEgg()">Save Record</button><button class="btn btn-outline" onclick="closeModal('m-egg')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- USER MANAGEMENT -->
+<div class="modal-overlay" id="m-users">
+  <div class="modal wide"><div class="modal-head"><h3>👥 User Management</h3><button class="mc" onclick="closeModal('m-users')">×</button></div>
+  <div style="padding:16px;">
+    <div class="info-box ib-blue" style="margin-bottom:12px;">Add or remove users. Each user has a name, role, PIN, and emoji avatar. All actions are logged with the user's name.</div>
+    <div id="users-list" style="margin-bottom:14px;"></div>
+    <div style="border-top:1px solid var(--border2);padding-top:14px;">
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px;">Add New User</div>
+      <div class="form-grid" style="padding:0;">
+        <div class="fg"><label>Name</label><input type="text" id="nu-name" placeholder="e.g. Mary Wanjiku"/></div>
+        <div class="fg"><label>Role</label><select id="nu-role"><option>Owner</option><option>Farm Manager</option><option>Worker</option><option>Vet</option></select></div>
+        <div class="fg"><label>PIN (4 digits)</label><input type="password" id="nu-pin" maxlength="4" placeholder="••••" inputmode="numeric"/></div>
+        <div class="fg"><label>Avatar Emoji</label><input type="text" id="nu-emoji" placeholder="🧑" maxlength="2"/></div>
+      </div>
+      <div class="form-actions" style="padding:0;margin-top:10px;"><button class="btn btn-primary" onclick="addUser()">Add User</button></div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- SYNC MODAL -->
+<div class="modal-overlay" id="m-sync">
+  <div class="modal"><div class="modal-head"><h3>☁ Cloud Sync</h3><button class="mc" onclick="closeModal('m-sync')">×</button></div>
+  <div style="padding:16px;">
+    <div id="sync-modal-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:11px;margin-bottom:12px;font-family:var(--mono);font-size:11px;line-height:1.8;"></div>
+    <div id="sync-modal-log" style="font-family:var(--mono);font-size:10px;background:#f0f0f0;border-radius:4px;padding:9px;max-height:120px;overflow-y:auto;margin-bottom:12px;line-height:1.8;"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="syncToCloud()">☁ Sync Now</button>
+      <button class="btn btn-blue" onclick="restoreFromCloud()">⬇ Restore</button>
+      <button class="btn btn-outline" onclick="closeModal('m-sync')">Close</button>
+    </div>
+  </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- SheetJS for Excel export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script type="module" src="/Farm system /System.js"></script>
+</body>
+</html>
